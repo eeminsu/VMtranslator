@@ -4,6 +4,6 @@
 7장 가상 머신 구현
 </br></br>
 
-1. Parser
-2. CodeWriter
+1. main.Parser
+2. main.CodeWriter
 3. Main
