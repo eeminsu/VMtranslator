@@ -36,10 +36,8 @@ public class Parser {
                 val = sc.nextLine().trim();
             }
         }
-        if(val.contains(" ")){
-            command = val.substring(0, val.indexOf(" "));
-        } else if(val.contains("/")){
-            command = val.substring(0, val.indexOf("/"));
+        if(val.contains("//")){
+            command = val.substring(0, val.indexOf("//")).trim();
         } else {
             command = val;
         }
@@ -77,14 +75,18 @@ public class Parser {
         if(commandType().equals("C_ARITHMETIC")) {
             return command;
         } else{
-            return command.substring(command.indexOf(" "), command.lastIndexOf(" "));
+            String[] comArr = command.split(" ");
+
+            return comArr[1];
         }
     }
 
     public int arg2(){
         if(commandType().equals("C_PUSH") | commandType().equals("C_POP")
         | commandType().equals("C_FUNCTION") | commandType().equals("C_CALL")){
-            return Integer.parseInt(command.substring(command.lastIndexOf(" ")));
+            String[] comArr = command.split(" ");
+
+            return Integer.parseInt(comArr[2]);
         }
         return 0;
     }
