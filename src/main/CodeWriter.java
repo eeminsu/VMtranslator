@@ -1,5 +1,3 @@
-package main;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -8,6 +6,9 @@ import java.util.Locale;
 
 public class CodeWriter {
     private BufferedWriter bw;
+    private int eqCnt = 0;
+    private int gtCnt = 0;
+    private int ltCnt = 0;
 
     public CodeWriter(File file) throws IOException {
         bw = new BufferedWriter(new FileWriter(file));
@@ -26,16 +27,16 @@ public class CodeWriter {
                 bw.write(addSubAndOr() + "M=M-D\n");
                 break;
             case "neg" :
-                bw.write(negNot() + "M=D-M\n");
+                bw.write("D=0\n"+ negNot() + "M=D-M\n");
                 break;
             case "eq" :
-                bw.write(eqGtLt("eq", "JEQ"));
+                bw.write(eqGtLt("eq", "JEQ", eqCnt++));
                 break;
             case "gt" :
-                bw.write(eqGtLt("gt", "JGT"));
+                bw.write(eqGtLt("gt", "JGT", gtCnt++));
                 break;
             case "lt" :
-                bw.write(eqGtLt("lt", "JLT"));
+                bw.write(eqGtLt("lt", "JLT", ltCnt++));
                 break;
             case "and" :
                 bw.write(addSubAndOr() + "M=D&M\n");
@@ -50,7 +51,7 @@ public class CodeWriter {
 
     }
 
-    public void writePushPop(String command, String segment, String index) throws IOException {
+    public void writePushPop(String command, String segment, int index) throws IOException {
         switch (command){
             case "C_PUSH" :
                 switch (segment){
@@ -61,7 +62,7 @@ public class CodeWriter {
                         bw.write(pushArgLcl("LCL", index));
                         break;
                     case "static" :
-                        bw.write(pushStatic(16 + Integer.parseInt(index)));
+                        bw.write(pushStatic(16 + index));
                         break;
                     case "constant" :
                         bw.write(pushConstant(index));
@@ -71,10 +72,14 @@ public class CodeWriter {
                         bw.write(pushThisThat(segment.toUpperCase(), index));
                         break;
                     case "pointer" :
-                        bw.write(pushPointerTmp("R3", index));
+                        if(index == 0){
+                            bw.write(pushPointer("THIS"));
+                        } else if(index == 1){
+                            bw.write(pushPointer("THAT"));
+                        }
                         break;
                     case "temp" :
-                        bw.write(pushPointerTmp("R5", index));
+                        bw.write(pushTemp("R5", index));
                         break;
                 }
                 break;
@@ -87,17 +92,21 @@ public class CodeWriter {
                         bw.write(popSegment("LCL", index));
                         break;
                     case "static" :
-                        bw.write(popStatic(16 + Integer.parseInt(index)));
+                        bw.write(popStatic(16 + index));
                         break;
                     case "this" :
                     case "that" :
                         bw.write(popSegment(segment.toUpperCase(), index));
                         break;
                     case "pointer" :
-                        bw.write(popSegment("R3", index));
+                        if(index == 0){
+                            bw.write(popPointer("THIS"));
+                        } else if(index == 1){
+                            bw.write(popPointer("THAT"));
+                        }
                         break;
                     case "temp" :
-                        bw.write(pushPointerTmp("R5", index));
+                        bw.write(popTemp("R5", index));
                         break;
                 }
         }
@@ -109,27 +118,31 @@ public class CodeWriter {
 
     private String negNot(){
         return "@SP\n" +
-                "AM=M-1\n";
+                "A=M-1\n";
     }
 
     private String addSubAndOr(){
-        return negNot() +
+        return "@SP\n" +
+                "AM=M-1\n" +
                 "D=M\n" +
                 "A=A-1\n";
     }
 
-    private String eqGtLt(String command, String jump){
+    private String eqGtLt(String command, String jump, int cnt){
         return addSubAndOr() +
-                "D=D-M\n" +
-                "@" + command + "\n" +
+                "D=M-D\n" +
+                "@" + command + cnt + "\n" +
                 "D;" + jump + "\n" +
                 "@SP\n" +
-                "A=M\n" +
+                "A=M-1\n" +
                 "M=0\n" +
-                "(" + command +")\n" +
+                "@continue" + command + cnt + "\n" +
+                "0;JMP\n" +
+                "(" + command + cnt +")\n" +
                 "@SP\n" +
-                "A=M\n" +
-                "M=-1\n";
+                "A=M-1\n" +
+                "M=-1\n" +
+                "(continue" + command + cnt + ")\n";
     }
 
     private String pushCom(){
@@ -140,7 +153,7 @@ public class CodeWriter {
                 "M=M+1\n";
     }
 
-    private String pushArgLcl(String segment, String index){
+    private String pushArgLcl(String segment, int index){
         return "@" + segment + "\n" +
                 "D=M\n" +
                 "@" + index + "\n" +
@@ -155,13 +168,13 @@ public class CodeWriter {
                 pushCom();
     }
 
-    private String pushConstant(String index){
+    private String pushConstant(int index){
         return "@" + index + "\n" +
                 "D=A\n" +
                 pushCom();
     }
 
-    private String pushThisThat(String segment, String index){
+    private String pushThisThat(String segment, int index){
         return "@" + segment + "\n" +
                 "D=M\n" +
                 "@" + index + "\n" +
@@ -170,7 +183,13 @@ public class CodeWriter {
                 pushCom();
     }
 
-    private String pushPointerTmp(String segment, String index){
+    private String pushPointer(String segment){
+        return "@" + segment + "\n" +
+                "D=M\n" +
+                pushCom();
+    }
+
+    private String pushTemp(String segment, int index){
         return "@" + index + "\n" +
                 "D=A\n" +
                 "@" + segment + "\n" +
@@ -190,11 +209,25 @@ public class CodeWriter {
                 "M=D\n";
     }
 
-    private String popSegment(String segment, String index){
+    private String popSegment(String segment, int index){
+        return "@" + segment + "\n" +
+                "D=M\n" +
+                "@" + index + "\n" +
+                "D=D+A\n" +
+                popCom();
+    }
+
+    private String popTemp(String segment, int index){
         return "@" + segment + "\n" +
                 "D=A\n" +
                 "@" + index + "\n" +
                 "D=D+A\n" +
+                popCom();
+    }
+
+    private String popPointer(String segment){
+        return "@" + segment + "\n" +
+                "D=A\n" +
                 popCom();
     }
 

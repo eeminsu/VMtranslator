@@ -1,5 +1,3 @@
-package main;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CodeWriterTest {
 
-    private main.CodeWriter codeWriter;
+    private CodeWriter codeWriter;
 
     @BeforeEach
     void setUp() throws IOException {
-        codeWriter = new main.CodeWriter(new File("C:\\Users\\ADMIN\\Desktop\\project\\VMtranslator\\src\\test\\main\\test.asm"));
+        codeWriter = new CodeWriter(new File("C:\\Users\\ADMIN\\Desktop\\project\\VMtranslator\\src\\test\\main\\test.asm"));
     }
 
     @Test
@@ -45,7 +43,7 @@ class CodeWriterTest {
     @Test
     void writePushPop() throws IOException {
         String readFile = "";
-        codeWriter.writePushPop("C_PUSH", "argument", "1");
+        codeWriter.writePushPop("C_PUSH", "argument", 1);
         codeWriter.close();
 
         Scanner sc = new Scanner(new File("C:\\Users\\ADMIN\\Desktop\\project\\VMtranslator\\src\\test\\main\\test.asm"));

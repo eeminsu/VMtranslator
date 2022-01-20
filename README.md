@@ -5,5 +5,5 @@
 </br></br>
 
 1. main.Parser
-2. main.CodeWriter
+2. CodeWriter
 3. Main
