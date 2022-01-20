@@ -10,7 +10,7 @@ public class CodeWriter {
     private BufferedWriter bw;
 
     public CodeWriter(File file) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        bw = new BufferedWriter(new FileWriter(file));
     }
 
     public void setFileName(String fileName){
@@ -115,7 +115,7 @@ public class CodeWriter {
     private String addSubAndOr(){
         return negNot() +
                 "D=M\n" +
-                "A=A-1";
+                "A=A-1\n";
     }
 
     private String eqGtLt(String command, String jump){
