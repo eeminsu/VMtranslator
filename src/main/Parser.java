@@ -56,9 +56,9 @@ public class Parser {
             return "C_POP";
         } else if(command.contains("label")){
             return "C_LABEL";
-        } else if(command.contains("goto")){
+        } else if(command.contains("goto") && !command.contains("if")){
             return "C_GOTO";
-        } else if(command.contains("if")){
+        } else if(command.contains("if-goto")){
             return "C_IF";
         } else if(command.contains("function")){
             return "C_FUNCTION";

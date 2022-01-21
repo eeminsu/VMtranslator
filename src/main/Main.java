@@ -11,26 +11,33 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         fileSearch(new File(args[0]));
+        String[] filePath = args[0].split("\\\\");
+
+        CodeWriter codeWriter = new CodeWriter(new File(args[0] + "\\" + filePath[filePath.length-1] + ".asm"));
 
         while (!fileList.isEmpty()){
             File file = fileList.poll();
 
             Parser parser = new Parser(file);
-            CodeWriter codeWriter = new CodeWriter(new File(file.toString().substring(0, file.toString().indexOf(".vm")) + ".asm"));
 
             while(parser.hasMoreCommands()){
                 parser.advance();
 
                 if(parser.commandType().equals("C_ARITHMETIC")){
                     codeWriter.writerArithmetic(parser.arg1());
-                }
-                if (parser.commandType().equals("C_PUSH") | parser.commandType().equals("C_POP")){
+                } else if (parser.commandType().equals("C_PUSH") | parser.commandType().equals("C_POP")){
                     codeWriter.writePushPop(parser.commandType(), parser.arg1(), parser.arg2());
+                } else if(parser.commandType().equals("C_LABEL")){
+                    codeWriter.writeLabel(parser.arg1());
+                } else if(parser.commandType().equals("C_GOTO")){
+                    codeWriter.writeGoto(parser.arg1());
+                } else if(parser.commandType().equals("C_IF")){
+                    codeWriter.writeIf(parser.arg1());
                 }
             }
 
-            codeWriter.close();
         }
+        codeWriter.close();
 
     }
 

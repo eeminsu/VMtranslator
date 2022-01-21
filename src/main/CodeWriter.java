@@ -112,6 +112,27 @@ public class CodeWriter {
         }
     }
 
+    public void writeLabel(String label) throws IOException {
+        bw.write("(" + label + ")\n");
+    }
+
+    public void writeGoto(String label) throws IOException {
+        String goTo = "@" + label + "\n" +
+                "0;JMP\n";
+
+        bw.write(goTo);
+    }
+
+    public void writeIf(String label) throws IOException {
+        String If = "@SP\n" +
+                "AM=M-1\n" +
+                "D=M\n" +
+                "@" + label + "\n" +
+                "D;JNE\n";
+
+        bw.write(If);
+    }
+
     public void close() throws IOException {
         bw.close();
     }
