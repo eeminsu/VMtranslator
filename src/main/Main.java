@@ -14,6 +14,7 @@ public class Main {
         String[] filePath = args[0].split("\\\\");
 
         CodeWriter codeWriter = new CodeWriter(new File(args[0] + "\\" + filePath[filePath.length-1] + ".asm"));
+        codeWriter.writeInit();
 
         while (!fileList.isEmpty()){
             File file = fileList.poll();
@@ -33,6 +34,12 @@ public class Main {
                     codeWriter.writeGoto(parser.arg1());
                 } else if(parser.commandType().equals("C_IF")){
                     codeWriter.writeIf(parser.arg1());
+                } else if(parser.commandType().equals("C_FUNCTION")){
+                    codeWriter.writeFunction(parser.arg1(), parser.arg2());
+                } else if(parser.commandType().equals("C_RETURN")){
+                    codeWriter.writeReturn();
+                } else if(parser.commandType().equals("C_CALL")){
+                    codeWriter.writeCall(parser.arg1(), parser.arg2());
                 }
             }
 
